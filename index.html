@@ -38,7 +38,7 @@
     let allData = [];
 
     async function loadDictionary() {
-      const res = await fetch('https://raw.githubusercontent.com/Dhammasutta/dhamma-dictionary/main/%E0%B8%9A%E0%B8%B2%E0%B8%A5%E0%B8%B5-%E0%B9%84%E0%B8%97%E0%B8%A2.json');
+      const res = await fetch('pali-thai.json'); // ✅ ใช้ชื่อไฟล์ใหม่ที่ไม่มีอักขระพิเศษ
       const data = await res.json();
       allData = data;
     }
