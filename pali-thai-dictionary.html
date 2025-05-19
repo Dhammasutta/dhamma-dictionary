@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>พจนานุกรมบาลี–ไทย</title>
+  <style>
+    body { font-family: sans-serif; max-width: 750px; margin: auto; padding: 2rem; background: #f9f9f9; }
+    input { width: 100%; padding: 0.5rem; font-size: 1.2rem; border: 1px solid #ccc; margin-bottom: 1rem; }
+    .entry { background: #fff; border-left: 5px solid #775c32; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .headword { font-weight: bold; color: #333; font-size: 1.1rem; }
+    .tooltip {
+      border-bottom: 1px dotted #333;
+      cursor: help;
+      position: relative;
+    }
+    .tooltip:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 0;
+      top: 1.5em;
+      background: #222;
+      color: #fff;
+      padding: 0.5em;
+      font-size: 0.9em;
+      white-space: pre-line;
+      z-index: 100;
+      border-radius: 4px;
+    }
+    .alphabet-bar {
+      margin-bottom: 1rem;
+    }
+    .alphabet-bar button {
+      margin: 0.2rem;
+      padding: 0.4rem 0.6rem;
+      border: none;
+      background: #ddd;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .alphabet-bar button.active {
+      background: #775c32;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>📚 พจนานุกรมบาลี–ไทย</h1>
+  <input type="text" id="search" placeholder="พิมพ์ค้นหาคำบาลี...">
+  <div class="alphabet-bar" id="alphabetBar"></div>
+  <div id="results"></div>
+
+  <script>
+    let allData = [];
+    const THAI_ALPHABET = [
+      "ก", "ข", "ค", "ง", "จ", "ฉ", "ช", "ซ", "ฌ", "ญ",
+      "ฎ", "ฏ", "ฐ", "ฑ", "ฒ", "ณ", "ด", "ต", "ถ", "ท",
+      "ธ", "น", "บ", "ป", "ผ", "ฝ", "พ", "ฟ", "ภ", "ม",
+      "ย", "ร", "ล", "ว", "ศ", "ษ", "ส", "ห", "ฬ", "อ", "ฮ"
+    ];
+
+    async function loadDictionary() {
+      const res = await fetch('https://raw.githubusercontent.com/Dhammasutta/dhamma-dictionary/main/%E0%B8%9A%E0%B8%B2%E0%B8%A5%E0%B8%B5-%E0%B9%84%E0%B8%97%E0%B8%A2.json');
+      const data = await res.json();
+      allData = data;
+      renderAlphabetBar();
+    }
+
+    function renderAlphabetBar() {
+      const bar = document.getElementById("alphabetBar");
+      THAI_ALPHABET.forEach(char => {
+        const btn = document.createElement("button");
+        btn.textContent = char;
+        btn.onclick = () => filterByAlphabet(char);
+        bar.appendChild(btn);
+      });
+    }
+
+    function filterByAlphabet(char) {
+      document.querySelectorAll(".alphabet-bar button").forEach(btn => btn.classList.remove("active"));
+      event.target.classList.add("active");
+      const resultsBox = document.getElementById("results");
+      resultsBox.innerHTML = '';
+      const matches = allData.filter(entry => entry.headword.startsWith(char));
+      matches.forEach(entry => {
+        const div = document.createElement("div");
+        div.className = "entry";
+        div.innerHTML = `<div class='headword'>${entry.headword}</div><div>${entry.content}</div>`;
+        resultsBox.appendChild(div);
+      });
+    }
+
+    document.getElementById("search").addEventListener("input", () => {
+      const query = event.target.value.trim().toLowerCase();
+      const resultsBox = document.getElementById("results");
+      resultsBox.innerHTML = '';
+      if (query.length > 0) {
+        const matches = allData.filter(entry => entry.headword.includes(query));
+        matches.forEach(entry => {
+          const div = document.createElement("div");
+          div.className = "entry";
+          div.innerHTML = `<div class='headword'>${entry.headword}</div><div>${entry.content}</div>`;
+          resultsBox.appendChild(div);
+        });
+      }
+    });
+
+    // 🧠 ฟังก์ชันแปลงคำบาลีให้มี tooltip อัตโนมัติ
+    function applyTooltipsToText(text, dict) {
+      dict.forEach(entry => {
+        const re = new RegExp(`(?<![\u0E00-\u0E7F])(${entry.headword})(?![\u0E00-\u0E7F])`, 'g');
+        text = text.replace(re, `<span class="tooltip" data-tooltip="${entry.content}">$1</span>`);
+      });
+      return text;
+    }
+
+    window.addEventListener("load", loadDictionary);
+  </script>
+</body>
+</html>
