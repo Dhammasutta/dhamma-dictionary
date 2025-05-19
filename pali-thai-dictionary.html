@@ -27,70 +27,23 @@
       z-index: 100;
       border-radius: 4px;
     }
-    .alphabet-bar {
-      margin-bottom: 1rem;
-    }
-    .alphabet-bar button {
-      margin: 0.2rem;
-      padding: 0.4rem 0.6rem;
-      border: none;
-      background: #ddd;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .alphabet-bar button.active {
-      background: #775c32;
-      color: white;
-    }
   </style>
 </head>
 <body>
   <h1>📚 พจนานุกรมบาลี–ไทย</h1>
   <input type="text" id="search" placeholder="พิมพ์ค้นหาคำบาลี...">
-  <div class="alphabet-bar" id="alphabetBar"></div>
   <div id="results"></div>
 
   <script>
     let allData = [];
-    const THAI_ALPHABET = [
-      "ก", "ข", "ค", "ง", "จ", "ฉ", "ช", "ซ", "ฌ", "ญ",
-      "ฎ", "ฏ", "ฐ", "ฑ", "ฒ", "ณ", "ด", "ต", "ถ", "ท",
-      "ธ", "น", "บ", "ป", "ผ", "ฝ", "พ", "ฟ", "ภ", "ม",
-      "ย", "ร", "ล", "ว", "ศ", "ษ", "ส", "ห", "ฬ", "อ", "ฮ"
-    ];
 
     async function loadDictionary() {
       const res = await fetch('https://raw.githubusercontent.com/Dhammasutta/dhamma-dictionary/main/%E0%B8%9A%E0%B8%B2%E0%B8%A5%E0%B8%B5-%E0%B9%84%E0%B8%97%E0%B8%A2.json');
       const data = await res.json();
       allData = data;
-      renderAlphabetBar();
     }
 
-    function renderAlphabetBar() {
-      const bar = document.getElementById("alphabetBar");
-      THAI_ALPHABET.forEach(char => {
-        const btn = document.createElement("button");
-        btn.textContent = char;
-        btn.onclick = () => filterByAlphabet(char);
-        bar.appendChild(btn);
-      });
-    }
-
-    function filterByAlphabet(char) {
-      document.querySelectorAll(".alphabet-bar button").forEach(btn => btn.classList.remove("active"));
-      event.target.classList.add("active");
-      const resultsBox = document.getElementById("results");
-      resultsBox.innerHTML = '';
-      const matches = allData.filter(entry => entry.headword.startsWith(char));
-      matches.forEach(entry => {
-        const div = document.createElement("div");
-        div.className = "entry";
-        div.innerHTML = `<div class='headword'>${entry.headword}</div><div>${entry.content}</div>`;
-        resultsBox.appendChild(div);
-      });
-    }
-
-    document.getElementById("search").addEventListener("input", () => {
+    document.getElementById("search").addEventListener("input", (event) => {
       const query = event.target.value.trim().toLowerCase();
       const resultsBox = document.getElementById("results");
       resultsBox.innerHTML = '';
